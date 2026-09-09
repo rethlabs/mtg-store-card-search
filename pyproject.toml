@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tcg-local-finder"
+version = "0.1.0"
+description = "Find wanted Magic: The Gathering cards in nearby TCGplayer store inventories."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Kyle Tuffentsamer"}]
+dependencies = []
+
+[project.scripts]
+tcg-local = "tcg_local_finder.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
