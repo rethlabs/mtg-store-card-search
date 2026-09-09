@@ -1,0 +1,23 @@
+name: Branch Flow Check
+
+on:
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify PR source branch
+        run: |
+          BASE="${{ github.event.pull_request.base.ref }}"
+          HEAD="${{ github.event.pull_request.head.ref }}"
+          if [ "$BASE" = "main" ] && [ "$HEAD" != "staging" ]; then
+            echo "PRs into main must come from staging (got '$HEAD')"
+            exit 1
+          fi
+          if [ "$BASE" = "staging" ] && [ "$HEAD" != "develop" ]; then
+            echo "PRs into staging must come from develop (got '$HEAD')"
+            exit 1
+          fi
+          echo "OK: $HEAD -> $BASE"
