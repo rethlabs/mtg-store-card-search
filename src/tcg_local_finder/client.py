@@ -142,7 +142,7 @@ class TCGPlayerClient:
             headers={
                 "Accept": "application/json",
                 "Authorization": f"bearer {self._bearer_token}",
-                "User-Agent": "tcg-local-finder/0.1.0",
+                "User-Agent": "mtg-store-card-search/0.1.0",
             },
         )
         payload = self._send(request)
@@ -172,4 +172,3 @@ class TCGPlayerClient:
                     continue
                 raise TCGPlayerError(f"Unable to reach TCGplayer: {exc}") from exc
         raise TCGPlayerError("TCGplayer request failed")
-

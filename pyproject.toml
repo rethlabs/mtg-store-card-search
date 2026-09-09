@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tcg-local-finder"
+name = "mtg-store-card-search"
 version = "0.1.0"
 description = "Find wanted Magic: The Gathering cards in nearby TCGplayer store inventories."
 readme = "README.md"
@@ -17,4 +17,3 @@ tcg-local = "tcg_local_finder.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

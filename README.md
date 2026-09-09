@@ -1,4 +1,4 @@
-# TCG Local Finder
+# MTG Store Card Search
 
 `tcg-local` searches TCGplayer store inventories for wanted Magic: The Gathering cards in selected cities or ZIP codes. It ranks stores by how many wanted cards they have, then by the combined price of the cheapest matching copies.
 
@@ -15,7 +15,7 @@ An optional `TCGPLAYER_ACCESS_TOKEN` is supported for applications that a partic
 Python 3.11 or newer is required.
 
 ```bash
-cd tcg-local-finder
+cd mtg-store-card-search
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
