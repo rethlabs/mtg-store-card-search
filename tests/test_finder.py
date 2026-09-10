@@ -8,7 +8,7 @@ from tcg_local_finder.models import Area, CardWanted, Store
 
 class FakeClient:
     def search_stores(self, **filters):
-        if filters.get("city") == "Austin":
+        if filters.get("city") == "Houston":
             return ["alpha", "shared"]
         return ["shared", "beta"]
 
@@ -54,10 +54,10 @@ class FinderTests(unittest.TestCase):
     def test_store_discovery_deduplicates_and_keeps_area_labels(self):
         stores = find_stores(
             FakeClient(),
-            [Area(city="Austin", state="TX"), Area(city="Temple", state="TX")],
+            [Area(city="Houston", state="TX"), Area(city="Dallas", state="TX")],
         )
         shared = next(store for store in stores if store.key == "shared")
-        self.assertEqual(shared.areas, ("Austin, TX", "Temple, TX"))
+        self.assertEqual(shared.areas, ("Dallas, TX", "Houston, TX"))
 
     def test_double_faced_card_matches_front_name(self):
         wanted = CardWanted(

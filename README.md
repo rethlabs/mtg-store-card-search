@@ -46,11 +46,11 @@ Search several cities for any English printing of two cards:
 
 ```bash
 tcg-local find \
-  --city Austin \
-  --city 'Cedar Park' \
-  --city Leander \
-  --city Belton \
-  --city Temple \
+  --city Houston \
+  --city Dallas \
+  --city 'San Antonio' \
+  --city 'Fort Worth' \
+  --city 'El Paso' \
   --state TX \
   --card 'Basilisk Collar' \
   --card 'Blade of the Bloodchief'
@@ -88,10 +88,12 @@ tcg-local find --request request.example.json --format csv > results.csv
 
 Use `--include-empty` to include stores with no matches. Use `--workers 1` if a credential's rate limit is particularly restrictive.
 
+API request starts are spaced at least 0.5 seconds apart across all worker threads. Retryable failures wait 60 seconds before the first retry and 3 minutes before the final retry. A third failure ends that request.
+
 ## Store discovery only
 
 ```bash
-tcg-local stores --city Austin --city Temple --state TX
+tcg-local stores --city Houston --city Dallas --state TX
 ```
 
 ## Tests

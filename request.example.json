@@ -1,10 +1,10 @@
 {
   "areas": [
-    {"city": "Austin", "state": "TX"},
-    {"city": "Cedar Park", "state": "TX"},
-    {"city": "Leander", "state": "TX"},
-    {"city": "Belton", "state": "TX"},
-    {"city": "Temple", "state": "TX"}
+    {"city": "Houston", "state": "TX"},
+    {"city": "Dallas", "state": "TX"},
+    {"city": "San Antonio", "state": "TX"},
+    {"city": "Fort Worth", "state": "TX"},
+    {"city": "El Paso", "state": "TX"}
   ],
   "cards": [
     {
@@ -53,4 +53,3 @@
     }
   ]
 }
-

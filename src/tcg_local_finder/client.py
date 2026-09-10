@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
 from typing import Any, Iterable
 from urllib.error import HTTPError, URLError
@@ -27,7 +28,8 @@ class TCGPlayerClient:
         api_base: str = "https://api.tcgplayer.com/v1.39.0",
         token_url: str = "https://api.tcgplayer.com/token",
         timeout: float = 20.0,
-        retries: int = 3,
+        retry_delays: tuple[float, ...] = (60.0, 180.0),
+        min_request_interval: float = 0.5,
     ) -> None:
         if not public_key or not private_key:
             raise TCGPlayerAuthError(
@@ -39,8 +41,11 @@ class TCGPlayerClient:
         self.api_base = api_base.rstrip("/")
         self.token_url = token_url
         self.timeout = timeout
-        self.retries = retries
+        self.retry_delays = retry_delays
+        self.min_request_interval = min_request_interval
         self._bearer_token: str | None = None
+        self._request_lock = threading.Lock()
+        self._next_request_time = 0.0
 
     @classmethod
     def from_environment(cls) -> "TCGPlayerClient":
@@ -151,8 +156,9 @@ class TCGPlayerClient:
         return payload
 
     def _send(self, request: Request) -> dict[str, Any]:
-        for attempt in range(self.retries + 1):
+        for attempt in range(len(self.retry_delays) + 1):
             try:
+                self._wait_for_request_slot()
                 with urlopen(request, timeout=self.timeout) as response:
                     return json.loads(response.read().decode("utf-8"))
             except HTTPError as exc:
@@ -162,13 +168,21 @@ class TCGPlayerClient:
                         f"TCGplayer rejected the credentials (HTTP 401): {body}"
                     ) from exc
                 if exc.code == 429 or 500 <= exc.code < 600:
-                    if attempt < self.retries:
-                        time.sleep(0.5 * (2**attempt))
+                    if attempt < len(self.retry_delays):
+                        time.sleep(self.retry_delays[attempt])
                         continue
                 raise TCGPlayerError(f"TCGplayer HTTP {exc.code}: {body}") from exc
             except (URLError, TimeoutError) as exc:
-                if attempt < self.retries:
-                    time.sleep(0.5 * (2**attempt))
+                if attempt < len(self.retry_delays):
+                    time.sleep(self.retry_delays[attempt])
                     continue
                 raise TCGPlayerError(f"Unable to reach TCGplayer: {exc}") from exc
         raise TCGPlayerError("TCGplayer request failed")
+
+    def _wait_for_request_slot(self) -> None:
+        with self._request_lock:
+            now = time.monotonic()
+            wait = self._next_request_time - now
+            if wait > 0:
+                time.sleep(wait)
+            self._next_request_time = max(now, self._next_request_time) + self.min_request_interval
