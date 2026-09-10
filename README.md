@@ -5,6 +5,27 @@
 `tcg-seller` is a separate, experimental program that searches a known public
 TCGplayer seller page without an API key or account login.
 
+`wizards-stores` discovers physical Magic stores near one or more cities using
+the public Wizards Store Locator.
+
+## Find physical stores
+
+```bash
+wizards-stores \
+  --city Houston \
+  --city Dallas \
+  --state TX \
+  --radius-miles 10
+```
+
+The output includes the store name, address, distance, Wizards store ID, and
+the city searches that matched it. Use `--format json` for the additional
+coordinates, phone, website, and WPN Premium flag.
+
+This command starts an anonymous locator session so Wizards can set its normal
+site cookies, but it never accepts account credentials or stores cookies after
+the process exits.
+
 ## Public seller search (no API key)
 
 Once you know a seller's public page, search it directly:
