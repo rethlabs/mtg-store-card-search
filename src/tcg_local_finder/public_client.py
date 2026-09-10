@@ -20,11 +20,15 @@ class TCGPlayerPublicClient:
         self,
         *,
         search_url: str = "https://mp-search-api.tcgplayer.com/v1/search/request",
+        seller_search_url: str = (
+            "https://mpapi.tcgplayer.com/v2/ShopBySeller/GetSellerSearchResults"
+        ),
         timeout: float = 20.0,
         retry_delays: tuple[float, ...] = (60.0, 180.0),
         min_request_interval: float = 0.5,
     ) -> None:
         self.search_url = search_url
+        self.seller_search_url = seller_search_url
         self.timeout = timeout
         self.retry_delays = retry_delays
         self.min_request_interval = min_request_interval
@@ -64,6 +68,49 @@ class TCGPlayerPublicClient:
                 break
             offset += len(page)
         return products
+
+    def search_sellers(
+        self,
+        seller_name: str,
+        *,
+        category_id: int = 1,
+        page: int = 1,
+    ) -> list[dict[str, Any]]:
+        if not seller_name.strip():
+            raise ValueError("seller_name cannot be empty")
+        body = {
+            "sellerName": seller_name.strip(),
+            "isDirect": False,
+            "isGoldStar": False,
+            "isCertified": False,
+            "categoryId": category_id,
+            "page": page,
+        }
+        request = Request(
+            self.seller_search_url,
+            data=json.dumps(body, separators=(",", ":")).encode("utf-8"),
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Origin": "https://www.tcgplayer.com",
+                "Referer": "https://www.tcgplayer.com/",
+                "User-Agent": "mtg-store-card-search/0.1.0",
+            },
+            method="POST",
+        )
+        payload = self._send(request)
+        errors = payload.get("errors") or []
+        if errors:
+            if all(
+                isinstance(error, dict) and str(error.get("code")) == "404"
+                for error in errors
+            ):
+                return []
+            raise TCGPlayerPublicError("; ".join(str(error) for error in errors))
+        result_sets = payload.get("results") or []
+        if not result_sets:
+            return []
+        return list(result_sets[0].get("searchResults") or [])
 
     def _search_page(
         self,
