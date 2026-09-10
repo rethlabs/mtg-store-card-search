@@ -219,8 +219,10 @@ tcg-local stores --city Houston --city Dallas --state TX
 Tests use fake API responses and do not require credentials or network access.
 
 ```bash
-PYTHONPATH=src python -m unittest discover -s tests -v
+mtg-tests
 ```
+
+The final line reports the exact result, for example `(46/46) tests passed`.
 
 ## What the program calls
 
