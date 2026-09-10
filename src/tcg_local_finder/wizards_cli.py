@@ -7,6 +7,8 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Sequence
 
+from .public_client import TCGPlayerPublicClient, TCGPlayerPublicError
+from .seller_resolution import resolve_seller
 from .wizards_client import WizardsLocatorClient, WizardsLocatorError
 
 
@@ -21,6 +23,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--radius-miles", type=int, default=10, help="Search radius (default: 10)"
     )
     parser.add_argument("--workers", type=int, default=4, help="Concurrent searches")
+    parser.add_argument(
+        "--resolve-tcgplayer",
+        action="store_true",
+        help="Find an exact TCGplayer seller match for each Wizards store",
+    )
     parser.add_argument("--format", choices=("table", "json"), default="table")
     return parser
 
@@ -40,12 +47,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             results = list(searches)
         stores = _combine_stores(results)
+        if args.resolve_tcgplayer:
+            _resolve_tcgplayer_sellers(stores, workers=args.workers)
         if args.format == "json":
             print(json.dumps(stores, indent=2))
         else:
             print(_render(stores))
         return 0
-    except (WizardsLocatorError, ValueError) as exc:
+    except (TCGPlayerPublicError, WizardsLocatorError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
@@ -82,10 +91,45 @@ def _combine_stores(
     return sorted(by_id.values(), key=lambda store: (store["distance_miles"], store["name"]))
 
 
+def _resolve_tcgplayer_sellers(
+    stores: list[dict[str, Any]],
+    *,
+    workers: int,
+) -> None:
+    client = TCGPlayerPublicClient()
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
+        matches = executor.map(
+            lambda store: _safe_resolve_seller(client, str(store["name"])), stores
+        )
+        for store, match in zip(stores, matches):
+            store["tcgplayer"] = match
+
+
+def _safe_resolve_seller(
+    client: TCGPlayerPublicClient,
+    store_name: str,
+) -> dict[str, Any]:
+    try:
+        return resolve_seller(client, store_name)
+    except TCGPlayerPublicError as exc:
+        return {
+            "status": "error",
+            "seller_key": None,
+            "seller_name": None,
+            "seller_location": None,
+            "seller_url": None,
+            "candidate_count": 0,
+            "error": str(exc),
+        }
+
+
 def _render(stores: list[dict[str, Any]]) -> str:
     if not stores:
         return "No Wizards stores found."
+    show_tcgplayer = any("tcgplayer" in store for store in stores)
     headers = ["Store", "Address", "Distance", "Wizards ID", "Matched area"]
+    if show_tcgplayer:
+        headers.extend(["TCG match", "Seller key"])
     rows = [
         [
             str(store["name"]),
@@ -94,6 +138,14 @@ def _render(stores: list[dict[str, Any]]) -> str:
             str(store["wizards_store_id"]),
             ", ".join(store["matched_areas"]),
         ]
+        + (
+            [
+                str(store["tcgplayer"]["status"]),
+                str(store["tcgplayer"]["seller_key"] or ""),
+            ]
+            if show_tcgplayer
+            else []
+        )
         for store in stores
     ]
     widths = [len(header) for header in headers]
