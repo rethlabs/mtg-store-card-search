@@ -22,6 +22,21 @@ The output includes the store name, address, distance, Wizards store ID, and
 the city searches that matched it. Use `--format json` for the additional
 coordinates, phone, website, and WPN Premium flag.
 
+Add `--resolve-tcgplayer` to search TCGplayer's public seller directory for an
+exact normalized store-name match:
+
+```bash
+wizards-stores \
+  --city Houston \
+  --state TX \
+  --radius-miles 10 \
+  --resolve-tcgplayer
+```
+
+Name normalization ignores capitalization, punctuation, and the difference
+between `&` and `and`. Partial matches are reported but never selected
+automatically.
+
 This command starts an anonymous locator session so Wizards can set its normal
 site cookies, but it never accepts account credentials or stores cookies after
 the process exits.
