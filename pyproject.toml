@@ -15,6 +15,7 @@ dependencies = []
 [project.scripts]
 tcg-local = "tcg_local_finder.cli:main"
 tcg-seller = "tcg_local_finder.public_cli:main"
+wizards-stores = "tcg_local_finder.wizards_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
