@@ -45,7 +45,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         client = TCGPlayerPublicClient()
         with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
             searches = executor.map(
-                lambda card: _listings(client, seller_name, seller_key, card), cards
+                lambda card: listings_for_card(client, seller_name, seller_key, card),
+                cards,
             )
             results = [listing for search in searches for listing in search]
         if args.format == "json":
@@ -71,7 +72,7 @@ def parse_seller_url(value: str) -> tuple[str, str]:
     return parts[1].replace("-", " "), parts[2]
 
 
-def _listings(
+def listings_for_card(
     client: TCGPlayerPublicClient,
     seller_name: str,
     seller_key: str,

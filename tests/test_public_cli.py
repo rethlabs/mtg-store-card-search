@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from tcg_local_finder.public_cli import _listings, build_parser, parse_seller_url
+from tcg_local_finder.public_cli import build_parser, listings_for_card, parse_seller_url
 
 
 class FakeClient:
@@ -50,7 +50,9 @@ class PublicCliTests(unittest.TestCase):
         self.assertEqual(key, "b31b0b79")
 
     def test_response_maps_seller_price_and_shipping(self):
-        listings = _listings(FakeClient(), "Black Castle Gamez", "b31b0b79", "Wind Strider")
+        listings = listings_for_card(
+            FakeClient(), "Black Castle Gamez", "b31b0b79", "Wind Strider"
+        )
         self.assertEqual(listings[0]["card_price"], 0.20)
         self.assertEqual(listings[0]["shipping_price"], 1.49)
         self.assertEqual(listings[0]["quantity"], 4)
