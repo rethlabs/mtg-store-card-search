@@ -2,6 +2,28 @@
 
 `tcg-local` searches TCGplayer store inventories for wanted Magic: The Gathering cards in selected cities or ZIP codes. It ranks stores by how many wanted cards they have, then by the combined price of the cheapest matching copies.
 
+`tcg-seller` is a separate, experimental program that searches a known public
+TCGplayer seller page without an API key or account login.
+
+## Public seller search (no API key)
+
+Once you know a seller's public page, search it directly:
+
+```bash
+tcg-seller \
+  --seller-url 'https://www.tcgplayer.com/sellers/Black-Castle-Gamez/b31b0b79' \
+  --card 'Wind Strider'
+```
+
+Repeat `--card` or use `--cards-file cards.txt`. Add `--format json` for
+machine-readable output. The program never asks for TCGplayer credentials and
+does not store browser cookies.
+
+This mode uses the same anonymous JSON request as TCGplayer's public seller
+storefront. It is not part of the documented developer API and may change
+without notice. Requests are still spaced at least 0.5 seconds apart and use
+the fixed 60-second and 3-minute retry schedule.
+
 ## Important API limitation
 
 TCGplayer requires an existing API developer key and no longer grants new API access. This program cannot bypass that restriction. If you already have a `PUBLIC_KEY` and `PRIVATE_KEY`, keep them private and provide them through environment variables.
