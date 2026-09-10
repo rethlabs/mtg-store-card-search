@@ -9,6 +9,14 @@ from typing import Any, Sequence
 
 from .public_cli import listings_for_card
 from .public_client import TCGPlayerPublicClient, TCGPlayerPublicError
+from .store_registry import (
+    DEFAULT_EXCLUSIONS_PATH,
+    DEFAULT_REGISTRY_PATH,
+    apply_store_registry,
+    load_exclusions,
+    load_registry,
+    stores_requiring_resolution,
+)
 from .wizards_cli import (
     _combine_stores,
     _resolve_tcgplayer_sellers,
@@ -30,6 +38,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--card", action="append", default=[], help="Card; repeatable")
     parser.add_argument("--cards-file", type=Path, help="One card name per line")
     parser.add_argument("--workers", type=int, default=4, help="Concurrent searches")
+    parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY_PATH)
+    parser.add_argument("--exclusions", type=Path, default=DEFAULT_EXCLUSIONS_PATH)
+    parser.add_argument(
+        "--recheck-all-stores",
+        action="store_true",
+        help="Bypass registry ages and configured exclusions",
+    )
     parser.add_argument(
         "--triage-file",
         default="tcgplayer-resolution-triage.jsonl",
@@ -55,7 +70,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             stores = _combine_stores(list(searches))
 
-        _resolve_tcgplayer_sellers(stores, workers=args.workers)
+        registry = load_registry(args.registry)
+        exclusions = load_exclusions(args.exclusions)
+        stores, _excluded = apply_store_registry(
+            stores,
+            registry,
+            exclusions,
+            recheck_all=args.recheck_all_stores,
+        )
+        stores_to_resolve = stores_requiring_resolution(
+            stores, recheck_all=args.recheck_all_stores
+        )
+        _resolve_tcgplayer_sellers(stores_to_resolve, workers=args.workers)
         _write_triage_file(stores, args.triage_file)
         results = search_local_inventory(stores, cards, workers=args.workers)
         if args.format == "json":
@@ -90,19 +116,26 @@ def search_local_inventory(
     client: TCGPlayerPublicClient | None = None,
 ) -> list[dict[str, Any]]:
     public_client = client or TCGPlayerPublicClient()
-    resolved = [
+    queryable = [
         store
         for store in stores
         if store.get("tcgplayer", {}).get("seller_key")
         and store.get("tcgplayer", {}).get("status")
-        in {"exact", "normalized", "stopword"}
+        in {"exact", "manual_verified", "normalized", "stopword"}
     ]
+    visible = [
+        store
+        for store in stores
+        if store in queryable
+        or store.get("registry", {}).get("singles_status") == "sells"
+    ]
+    queryable_ids = {str(store["wizards_store_id"]) for store in queryable}
     listings: dict[tuple[str, str], list[dict[str, Any]]] = {}
     errors: dict[tuple[str, str], str] = {}
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
         futures = {}
-        for store in resolved:
+        for store in queryable:
             seller = store["tcgplayer"]
             for card in cards:
                 future = executor.submit(
@@ -121,8 +154,9 @@ def search_local_inventory(
                 errors[key] = str(exc)
 
     results = []
-    for store in resolved:
+    for store in visible:
         store_id = str(store["wizards_store_id"])
+        searched = store_id in queryable_ids
         cheapest = []
         store_errors = []
         for card in cards:
@@ -148,6 +182,10 @@ def search_local_inventory(
                 "seller_name": store["tcgplayer"]["seller_name"],
                 "seller_key": store["tcgplayer"]["seller_key"],
                 "seller_match": store["tcgplayer"]["status"],
+                "inventory_status": (
+                    "tcgplayer" if searched else store["tcgplayer"]["status"]
+                ),
+                "searched": searched,
                 "wanted_count": len(cards),
                 "found_count": len(cheapest),
                 "card_subtotal": round(
@@ -160,6 +198,7 @@ def search_local_inventory(
     return sorted(
         results,
         key=lambda result: (
+            not result["searched"],
             -result["found_count"],
             result["card_subtotal"],
             result["distance_miles"],
@@ -176,6 +215,7 @@ def _render(results: list[dict[str, Any]]) -> str:
         "Distance",
         "Coverage",
         "Subtotal",
+        "Inventory",
         "Wanted card",
         "Set",
         "Condition",
@@ -192,8 +232,13 @@ def _render(results: list[dict[str, Any]]) -> str:
                 [
                     str(result["store_name"]),
                     f"{result['distance_miles']:.2f} mi",
-                    f"{result['found_count']}/{result['wanted_count']}",
-                    f"${result['card_subtotal']:.2f}",
+                    (
+                        f"{result['found_count']}/{result['wanted_count']}"
+                        if result["searched"]
+                        else "not searched"
+                    ),
+                    f"${result['card_subtotal']:.2f}" if result["searched"] else "",
+                    str(result["inventory_status"]),
                     str(match["wanted"] if match else ""),
                     str((match or {}).get("set") or ""),
                     str((match or {}).get("condition") or ""),
