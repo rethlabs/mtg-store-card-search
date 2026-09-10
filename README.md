@@ -19,6 +19,9 @@ Repeat `--card` or use `--cards-file cards.txt`. Add `--format json` for
 machine-readable output. The program never asks for TCGplayer credentials and
 does not store browser cookies.
 
+Card searches use four workers by default while sharing the global request
+interval. Use `--workers 1` to search sequentially.
+
 This mode uses the same anonymous JSON request as TCGplayer's public seller
 storefront. It is not part of the documented developer API and may change
 without notice. Requests are still spaced at least 0.5 seconds apart and use
