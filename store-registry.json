@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "stores": [
+    {
+      "store_name": "Black Castle Gamez",
+      "singles_status": "sells",
+      "tcgplayer_status": "manual_verified",
+      "seller_name": "Black Castle Gamez",
+      "seller_key": "b31b0b79",
+      "seller_location": "Texas, US",
+      "seller_url": "https://www.tcgplayer.com/sellers/Black-Castle-Gamez/b31b0b79",
+      "last_checked": "2026-09-10",
+      "notes": "Exact directory match and live inventory verified."
+    },
+    {
+      "store_name": "Black Rose Gaming",
+      "singles_status": "sells",
+      "tcgplayer_status": "manual_verified",
+      "seller_name": "Black Rose Gaming",
+      "seller_key": "f1713907",
+      "seller_location": "Texas, US",
+      "seller_url": "https://www.tcgplayer.com/sellers/Black-Rose-Gaming/f1713907",
+      "last_checked": "2026-09-10",
+      "notes": "Exact public-directory match verified."
+    },
+    {
+      "store_name": "Card Traders of Austin",
+      "singles_status": "sells",
+      "tcgplayer_status": "manual_verified",
+      "seller_name": "Card Traders Austin",
+      "seller_key": "bfe5e82c",
+      "seller_location": "US",
+      "seller_url": "https://www.tcgplayer.com/sellers/Card-Traders-Austin/bfe5e82c",
+      "last_checked": "2026-09-10",
+      "notes": "Stop-word match verified through the public directory."
+    },
+    {
+      "store_name": "Pat's Games",
+      "singles_status": "sells",
+      "tcgplayer_status": "manual_verified",
+      "seller_name": "PatsGamesATX",
+      "seller_key": "1ee68612",
+      "seller_location": "Austin, Texas",
+      "seller_url": "https://www.tcgplayer.com/sellers/PatsGamesATX/1ee68612",
+      "last_checked": "2026-09-10",
+      "notes": "Public seller page and store website verified."
+    },
+    {
+      "store_name": "Mage's Sanctum",
+      "singles_status": "sells",
+      "tcgplayer_status": "manual_verified",
+      "seller_name": "Mage's Sanctum",
+      "seller_key": "6858f97a",
+      "seller_location": "Austin, Texas",
+      "seller_url": "https://www.tcgplayer.com/sellers/Mage%27s-Sanctum/6858f97a",
+      "last_checked": "2026-09-10",
+      "notes": "Public seller page verified."
+    },
+    {
+      "store_name": "Outlaw Moon Games and Toys",
+      "singles_status": "sells",
+      "tcgplayer_status": "manual_verified",
+      "seller_name": "Outlaw Moon Games",
+      "seller_key": "a39dff83",
+      "seller_location": "Austin, Texas",
+      "seller_url": "https://www.tcgplayer.com/sellers/Outlaw-Moon-Games/a39dff83",
+      "last_checked": "2026-09-10",
+      "notes": "Public seller page verified."
+    },
+    {
+      "store_name": "PixelHaven Gaming & Collectables",
+      "singles_status": "sells",
+      "tcgplayer_status": "candidate",
+      "seller_name": "PixelHaven ATX",
+      "seller_key": "c520461b",
+      "seller_location": "Texas, US",
+      "last_checked": "2026-09-10",
+      "notes": "Strong directory candidate; identity not independently verified."
+    },
+    {
+      "store_name": "Space Goblin Collectibles",
+      "singles_status": "sells",
+      "tcgplayer_status": "candidate",
+      "seller_name": "SpaceGoblinMTG",
+      "seller_key": "c8531e70",
+      "seller_location": "Texas, US",
+      "last_checked": "2026-09-10",
+      "notes": "Strong directory candidate; identity not independently verified."
+    },
+    {
+      "store_name": "Home Town Cards & Collectibles",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Gamefellas - Stassney Heights",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Gamefellas - Southpark Meadows",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Fei's Games",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Battleground Collectibles",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Bell's Gaming Center",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Mothership Books and Games",
+      "singles_status": "sells",
+      "tcgplayer_status": "physical_only",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Titan Moon Comics",
+      "singles_status": "does_not_sell",
+      "tcgplayer_status": "does_not_sell_singles",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Dragon's Lair Comics and Fantasy - Austin",
+      "singles_status": "does_not_sell",
+      "tcgplayer_status": "does_not_sell_singles",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Emerald Tavern Games and Cafe",
+      "singles_status": "does_not_sell",
+      "tcgplayer_status": "does_not_sell_singles",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Bat City Games & Comics",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "The Secret Lantern Books & Games",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Resurrected Games",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "The Tiny Minotaur",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Wonko's Toys and Games",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Adventures in Ink",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Blade and Banner Games",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    },
+    {
+      "store_name": "Game Kastle - Austin",
+      "singles_status": "unknown",
+      "tcgplayer_status": "unknown",
+      "last_checked": "2026-09-10"
+    }
+  ]
+}

@@ -17,6 +17,7 @@ tcg-local = "tcg_local_finder.cli:main"
 tcg-seller = "tcg_local_finder.public_cli:main"
 wizards-stores = "tcg_local_finder.wizards_cli:main"
 mtg-local-search = "tcg_local_finder.local_cli:main"
+mtg-store-registry = "tcg_local_finder.registry_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

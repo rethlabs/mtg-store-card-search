@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "exact_names": [
+    {
+      "name": "Alamo Drafthouse Cinema South Lamar",
+      "reason": "movie theater excluded from singles search"
+    },
+    {
+      "name": "Vigilante Gastropub & Games",
+      "reason": "excluded by search policy"
+    },
+    {
+      "name": "Juniors",
+      "reason": "store entry should be removed from local singles results"
+    }
+  ],
+  "name_prefixes": [
+    {
+      "prefix": "GameStop -",
+      "reason": "retail chain has no verified online singles storefront"
+    }
+  ]
+}

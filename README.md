@@ -70,6 +70,33 @@ shipping because marketplace shipping can depend on the combined order.
 Repeat `--city` or `--card`, or use `--cards-file cards.txt`. Unresolved seller
 names are written to the same JSONL triage report used by `wizards-stores`.
 
+## Store registry
+
+`store-registry.json` separates physical singles availability from TCGplayer
+seller resolution. Manually verified seller keys are reused without another
+directory lookup. Known physical-only stores remain classified without being
+misreported as missing sellers.
+
+`store-exclusions.json` removes configured exact names and name prefixes from
+local singles searches. Use `--recheck-all-stores` with `mtg-local-search` to
+temporarily bypass registry ages and exclusions.
+
+Audit the registry using its status-specific 30-day and 90-day intervals:
+
+```bash
+mtg-store-registry audit
+```
+
+Override the intervals for a one-time report:
+
+```bash
+mtg-store-registry audit --stale-days 30
+```
+
+The audit is read-only. `manual_verified` entries are due only after a recorded
+error or when `--recheck-all-stores` is supplied. Unknown and candidate entries
+default to 30 days; physical-only and does-not-sell entries default to 90 days.
+
 ## Public seller search (no API key)
 
 Once you know a seller's public page, search it directly:

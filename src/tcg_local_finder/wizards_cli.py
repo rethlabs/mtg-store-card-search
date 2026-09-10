@@ -137,7 +137,17 @@ def _write_triage_file(stores: list[dict[str, Any]], path: str) -> None:
         store
         for store in stores
         if store.get("tcgplayer", {}).get("status")
-        not in {"exact", "normalized", "stopword"}
+        not in {
+            "automatic",
+            "candidate",
+            "does_not_sell_singles",
+            "exact",
+            "manual_verified",
+            "normalized",
+            "physical_only",
+            "stopword",
+            "unknown",
+        }
     ]
     records = []
     for store in unresolved:

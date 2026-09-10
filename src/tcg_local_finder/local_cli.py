@@ -9,6 +9,14 @@ from typing import Any, Sequence
 
 from .public_cli import listings_for_card
 from .public_client import TCGPlayerPublicClient, TCGPlayerPublicError
+from .store_registry import (
+    DEFAULT_EXCLUSIONS_PATH,
+    DEFAULT_REGISTRY_PATH,
+    apply_store_registry,
+    load_exclusions,
+    load_registry,
+    stores_requiring_resolution,
+)
 from .wizards_cli import (
     _combine_stores,
     _resolve_tcgplayer_sellers,
@@ -30,6 +38,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--card", action="append", default=[], help="Card; repeatable")
     parser.add_argument("--cards-file", type=Path, help="One card name per line")
     parser.add_argument("--workers", type=int, default=4, help="Concurrent searches")
+    parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY_PATH)
+    parser.add_argument("--exclusions", type=Path, default=DEFAULT_EXCLUSIONS_PATH)
+    parser.add_argument(
+        "--recheck-all-stores",
+        action="store_true",
+        help="Bypass registry ages and configured exclusions",
+    )
     parser.add_argument(
         "--triage-file",
         default="tcgplayer-resolution-triage.jsonl",
@@ -55,7 +70,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             stores = _combine_stores(list(searches))
 
-        _resolve_tcgplayer_sellers(stores, workers=args.workers)
+        registry = load_registry(args.registry)
+        exclusions = load_exclusions(args.exclusions)
+        stores, _excluded = apply_store_registry(
+            stores,
+            registry,
+            exclusions,
+            recheck_all=args.recheck_all_stores,
+        )
+        stores_to_resolve = stores_requiring_resolution(
+            stores, recheck_all=args.recheck_all_stores
+        )
+        _resolve_tcgplayer_sellers(stores_to_resolve, workers=args.workers)
         _write_triage_file(stores, args.triage_file)
         results = search_local_inventory(stores, cards, workers=args.workers)
         if args.format == "json":
@@ -95,7 +121,7 @@ def search_local_inventory(
         for store in stores
         if store.get("tcgplayer", {}).get("seller_key")
         and store.get("tcgplayer", {}).get("status")
-        in {"exact", "normalized", "stopword"}
+        in {"exact", "manual_verified", "normalized", "stopword"}
     ]
     listings: dict[tuple[str, str], list[dict[str, Any]]] = {}
     errors: dict[tuple[str, str], str] = {}
