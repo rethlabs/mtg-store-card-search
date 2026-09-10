@@ -22,6 +22,50 @@ class FakeResponse:
 
 
 class PublicClientTests(unittest.TestCase):
+    def test_seller_search_treats_api_404_as_no_match(self):
+        response = {
+            "errors": [{"code": "404", "message": "Seller results not found"}],
+            "results": [],
+        }
+        client = TCGPlayerPublicClient(retry_delays=(), min_request_interval=0)
+
+        with patch(
+            "tcg_local_finder.public_client.urlopen",
+            return_value=FakeResponse(response),
+        ):
+            sellers = client.search_sellers("Missing Store")
+
+        self.assertEqual(sellers, [])
+
+    def test_seller_search_uses_magic_category_without_credentials(self):
+        response = {
+            "errors": [],
+            "results": [
+                {
+                    "searchResults": [
+                        {
+                            "displayName": "Black Castle Gamez",
+                            "sellerKey": "b31b0b79",
+                        }
+                    ]
+                }
+            ],
+        }
+        client = TCGPlayerPublicClient(retry_delays=(), min_request_interval=0)
+
+        with patch(
+            "tcg_local_finder.public_client.urlopen",
+            return_value=FakeResponse(response),
+        ) as open_url:
+            sellers = client.search_sellers("Black Castle Gamez")
+
+        self.assertEqual(sellers[0]["sellerKey"], "b31b0b79")
+        request = open_url.call_args.args[0]
+        body = json.loads(request.data)
+        self.assertEqual(body["categoryId"], 1)
+        self.assertNotIn("Authorization", request.headers)
+        self.assertNotIn("Cookie", request.headers)
+
     def test_search_uses_anonymous_seller_filter(self):
         response = {
             "errors": [],
