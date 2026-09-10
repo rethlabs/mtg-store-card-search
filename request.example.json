@@ -1,0 +1,55 @@
+{
+  "areas": [
+    {"city": "Houston", "state": "TX"},
+    {"city": "Dallas", "state": "TX"},
+    {"city": "San Antonio", "state": "TX"},
+    {"city": "Fort Worth", "state": "TX"},
+    {"city": "El Paso", "state": "TX"}
+  ],
+  "cards": [
+    {
+      "name": "Basilisk Collar",
+      "set": "Commander Legends: Battle for Baldur's Gate",
+      "number": "595",
+      "condition": "Near Mint",
+      "language": "English",
+      "finish": "foil"
+    },
+    {
+      "name": "Blade of the Bloodchief",
+      "set": "Zendikar",
+      "number": "196",
+      "condition": "Near Mint",
+      "language": "English",
+      "finish": "nonfoil"
+    },
+    {
+      "name": "Chain of Smog",
+      "condition": "Near Mint",
+      "language": "English"
+    },
+    {
+      "name": "Professor Onyx",
+      "set": "Strixhaven: School of Mages",
+      "number": "83",
+      "condition": "Near Mint",
+      "language": "English"
+    },
+    {
+      "name": "Requiem Monolith",
+      "set": "Edge of Eternities",
+      "number": "333",
+      "condition": "Near Mint",
+      "language": "English",
+      "finish": "nonfoil"
+    },
+    {
+      "name": "Tergrid, God of Fright",
+      "set": "Kaldheim",
+      "number": "307",
+      "condition": "Near Mint",
+      "language": "English",
+      "finish": "nonfoil"
+    }
+  ]
+}

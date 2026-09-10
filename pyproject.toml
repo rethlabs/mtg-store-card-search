@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mtg-store-card-search"
+version = "0.1.0"
+description = "Find wanted Magic: The Gathering cards in nearby TCGplayer store inventories."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Kyle Tuffentsamer"}]
+dependencies = []
+
+[project.scripts]
+tcg-local = "tcg_local_finder.cli:main"
+tcg-seller = "tcg_local_finder.public_cli:main"
+wizards-stores = "tcg_local_finder.wizards_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
