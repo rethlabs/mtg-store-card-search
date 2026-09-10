@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Sequence
 from urllib.parse import urlparse
@@ -22,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--card", action="append", default=[], help="Card name; repeatable")
     parser.add_argument("--cards-file", type=Path, help="One card name per line")
+    parser.add_argument("--workers", type=int, default=4, help="Concurrent searches")
     parser.add_argument("--format", choices=("table", "json"), default="table")
     return parser
 
@@ -41,11 +43,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise ValueError("Provide --card or --cards-file")
 
         client = TCGPlayerPublicClient()
-        results = [
-            listing
-            for card in cards
-            for listing in _listings(client, seller_name, seller_key, card)
-        ]
+        with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
+            searches = executor.map(
+                lambda card: _listings(client, seller_name, seller_key, card), cards
+            )
+            results = [listing for search in searches for listing in search]
         if args.format == "json":
             print(json.dumps(results, indent=2))
         else:
