@@ -22,8 +22,8 @@ The output includes the store name, address, distance, Wizards store ID, and
 the city searches that matched it. Use `--format json` for the additional
 coordinates, phone, website, and WPN Premium flag.
 
-Add `--resolve-tcgplayer` to search TCGplayer's public seller directory for an
-exact normalized store-name match:
+Add `--resolve-tcgplayer` to search TCGplayer's public seller directory for a
+store-name match:
 
 ```bash
 wizards-stores \
@@ -33,9 +33,17 @@ wizards-stores \
   --resolve-tcgplayer
 ```
 
-Name normalization ignores capitalization, punctuation, and the difference
-between `&` and `and`. Partial matches are reported but never selected
-automatically.
+Seller resolution first compares the complete names, then ignores
+capitalization and punctuation, and finally compares again without the stop
+words `a`, `an`, `as`, `of`, and `the`. When a complete-name lookup fails, the
+resolver searches TCGplayer's autocomplete using progressively longer name
+prefixes and keeps the last nonempty candidate list. A comparison pass must
+produce exactly one match before its seller key is selected.
+
+Unresolved and ambiguous stores produce warnings and are written to
+`tcgplayer-resolution-triage.jsonl` for manual investigation. Use
+`--triage-file PATH` to choose another location. The report contains the
+Wizards store information, attempted queries, candidates, and request errors.
 
 This command starts an anonymous locator session so Wizards can set its normal
 site cookies, but it never accepts account credentials or stores cookies after

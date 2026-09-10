@@ -22,6 +22,25 @@ class FakeResponse:
 
 
 class PublicClientTests(unittest.TestCase):
+    def test_seller_name_suggestions_are_anonymous_and_flattened(self):
+        response = {
+            "errors": [],
+            "results": [["Card Traders Austin", "Texas Card Traders"]],
+        }
+        client = TCGPlayerPublicClient(retry_delays=(), min_request_interval=0)
+
+        with patch(
+            "tcg_local_finder.public_client.urlopen",
+            return_value=FakeResponse(response),
+        ) as open_url:
+            names = client.suggest_seller_names("Card Traders")
+
+        self.assertEqual(names, ["Card Traders Austin", "Texas Card Traders"])
+        request = open_url.call_args.args[0]
+        self.assertIn("query=Card+Traders", request.full_url)
+        self.assertNotIn("Authorization", request.headers)
+        self.assertNotIn("Cookie", request.headers)
+
     def test_seller_search_treats_api_404_as_no_match(self):
         response = {
             "errors": [{"code": "404", "message": "Seller results not found"}],

@@ -23,12 +23,16 @@ class TCGPlayerPublicClient:
         seller_search_url: str = (
             "https://mpapi.tcgplayer.com/v2/ShopBySeller/GetSellerSearchResults"
         ),
+        seller_names_url: str = (
+            "https://mpapi.tcgplayer.com/v2/ShopBySeller/GetSellerNames"
+        ),
         timeout: float = 20.0,
         retry_delays: tuple[float, ...] = (60.0, 180.0),
         min_request_interval: float = 0.5,
     ) -> None:
         self.search_url = search_url
         self.seller_search_url = seller_search_url
+        self.seller_names_url = seller_names_url
         self.timeout = timeout
         self.retry_delays = retry_delays
         self.min_request_interval = min_request_interval
@@ -111,6 +115,36 @@ class TCGPlayerPublicClient:
         if not result_sets:
             return []
         return list(result_sets[0].get("searchResults") or [])
+
+    def suggest_seller_names(self, query: str) -> list[str]:
+        if not query.strip():
+            raise ValueError("query cannot be empty")
+        request = Request(
+            f"{self.seller_names_url}?{urlencode({'query': query.strip()})}",
+            headers={
+                "Accept": "application/json",
+                "Origin": "https://www.tcgplayer.com",
+                "Referer": "https://www.tcgplayer.com/",
+                "User-Agent": "mtg-store-card-search/0.1.0",
+            },
+            method="GET",
+        )
+        payload = self._send(request)
+        errors = payload.get("errors") or []
+        if errors:
+            if all(
+                isinstance(error, dict) and str(error.get("code")) == "404"
+                for error in errors
+            ):
+                return []
+            raise TCGPlayerPublicError("; ".join(str(error) for error in errors))
+        return [
+            str(name)
+            for group in payload.get("results") or []
+            if isinstance(group, list)
+            for name in group
+            if str(name).strip()
+        ]
 
     def _search_page(
         self,

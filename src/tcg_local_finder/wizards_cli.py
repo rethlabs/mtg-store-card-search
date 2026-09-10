@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -10,6 +11,8 @@ from typing import Any, Sequence
 from .public_client import TCGPlayerPublicClient, TCGPlayerPublicError
 from .seller_resolution import resolve_seller
 from .wizards_client import WizardsLocatorClient, WizardsLocatorError
+
+LOGGER = logging.getLogger(__name__)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,6 +24,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--state", default="TX", help="State code (default: TX)")
     parser.add_argument(
         "--radius-miles", type=int, default=10, help="Search radius (default: 10)"
+    )
+    parser.add_argument(
+        "--triage-file",
+        default="tcgplayer-resolution-triage.jsonl",
+        help="Write unresolved TCGplayer matches here (default: %(default)s)",
     )
     parser.add_argument("--workers", type=int, default=4, help="Concurrent searches")
     parser.add_argument(
@@ -49,6 +57,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         stores = _combine_stores(results)
         if args.resolve_tcgplayer:
             _resolve_tcgplayer_sellers(stores, workers=args.workers)
+            _write_triage_file(stores, args.triage_file)
         if args.format == "json":
             print(json.dumps(stores, indent=2))
         else:
@@ -121,6 +130,37 @@ def _safe_resolve_seller(
             "candidate_count": 0,
             "error": str(exc),
         }
+
+
+def _write_triage_file(stores: list[dict[str, Any]], path: str) -> None:
+    unresolved = [
+        store
+        for store in stores
+        if store.get("tcgplayer", {}).get("status")
+        not in {"exact", "normalized", "stopword"}
+    ]
+    records = []
+    for store in unresolved:
+        match = store["tcgplayer"]
+        LOGGER.warning(
+            "TCGplayer seller unresolved for %s (%s)",
+            store["name"],
+            match["status"],
+        )
+        records.append(
+            {
+                "wizards_store_id": store["wizards_store_id"],
+                "store_name": store["name"],
+                "address": store.get("address"),
+                "status": match["status"],
+                "attempted_queries": match.get("attempted_queries", []),
+                "candidates": match.get("candidates", []),
+                "error": match.get("error"),
+            }
+        )
+    with open(path, "w", encoding="utf-8") as triage_file:
+        for record in records:
+            triage_file.write(json.dumps(record, sort_keys=True) + "\n")
 
 
 def _render(stores: list[dict[str, Any]]) -> str:
