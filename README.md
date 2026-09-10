@@ -49,6 +49,27 @@ This command starts an anonymous locator session so Wizards can set its normal
 site cookies, but it never accepts account credentials or stores cookies after
 the process exits.
 
+## Search nearby stores for cards
+
+Run the complete public search with one or more cities and cards:
+
+```bash
+mtg-local-search \
+  --city 'Cedar Park' \
+  --state TX \
+  --radius-miles 10 \
+  --card 'Basilisk Collar' \
+  --card 'Blade of the Bloodchief'
+```
+
+The command discovers Wizards stores, resolves their TCGplayer storefronts,
+searches every resolved seller for the requested cards, and ranks sellers by
+card coverage, card subtotal, distance, and name. The subtotal excludes
+shipping because marketplace shipping can depend on the combined order.
+
+Repeat `--city` or `--card`, or use `--cards-file cards.txt`. Unresolved seller
+names are written to the same JSONL triage report used by `wizards-stores`.
+
 ## Public seller search (no API key)
 
 Once you know a seller's public page, search it directly:
