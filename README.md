@@ -75,7 +75,8 @@ names are written to the same JSONL triage report used by `wizards-stores`.
 `store-registry.json` separates physical singles availability from TCGplayer
 seller resolution. Manually verified seller keys are reused without another
 directory lookup. Known physical-only stores remain classified without being
-misreported as missing sellers.
+misreported as missing sellers. They remain visible in local-search output as
+`not searched`; only verified seller keys generate TCGplayer inventory calls.
 
 `store-exclusions.json` removes configured exact names and name prefixes from
 local singles searches. Use `--recheck-all-stores` with `mtg-local-search` to

@@ -116,19 +116,26 @@ def search_local_inventory(
     client: TCGPlayerPublicClient | None = None,
 ) -> list[dict[str, Any]]:
     public_client = client or TCGPlayerPublicClient()
-    resolved = [
+    queryable = [
         store
         for store in stores
         if store.get("tcgplayer", {}).get("seller_key")
         and store.get("tcgplayer", {}).get("status")
         in {"exact", "manual_verified", "normalized", "stopword"}
     ]
+    visible = [
+        store
+        for store in stores
+        if store in queryable
+        or store.get("registry", {}).get("singles_status") == "sells"
+    ]
+    queryable_ids = {str(store["wizards_store_id"]) for store in queryable}
     listings: dict[tuple[str, str], list[dict[str, Any]]] = {}
     errors: dict[tuple[str, str], str] = {}
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
         futures = {}
-        for store in resolved:
+        for store in queryable:
             seller = store["tcgplayer"]
             for card in cards:
                 future = executor.submit(
@@ -147,8 +154,9 @@ def search_local_inventory(
                 errors[key] = str(exc)
 
     results = []
-    for store in resolved:
+    for store in visible:
         store_id = str(store["wizards_store_id"])
+        searched = store_id in queryable_ids
         cheapest = []
         store_errors = []
         for card in cards:
@@ -174,6 +182,10 @@ def search_local_inventory(
                 "seller_name": store["tcgplayer"]["seller_name"],
                 "seller_key": store["tcgplayer"]["seller_key"],
                 "seller_match": store["tcgplayer"]["status"],
+                "inventory_status": (
+                    "tcgplayer" if searched else store["tcgplayer"]["status"]
+                ),
+                "searched": searched,
                 "wanted_count": len(cards),
                 "found_count": len(cheapest),
                 "card_subtotal": round(
@@ -186,6 +198,7 @@ def search_local_inventory(
     return sorted(
         results,
         key=lambda result: (
+            not result["searched"],
             -result["found_count"],
             result["card_subtotal"],
             result["distance_miles"],
@@ -202,6 +215,7 @@ def _render(results: list[dict[str, Any]]) -> str:
         "Distance",
         "Coverage",
         "Subtotal",
+        "Inventory",
         "Wanted card",
         "Set",
         "Condition",
@@ -218,8 +232,13 @@ def _render(results: list[dict[str, Any]]) -> str:
                 [
                     str(result["store_name"]),
                     f"{result['distance_miles']:.2f} mi",
-                    f"{result['found_count']}/{result['wanted_count']}",
-                    f"${result['card_subtotal']:.2f}",
+                    (
+                        f"{result['found_count']}/{result['wanted_count']}"
+                        if result["searched"]
+                        else "not searched"
+                    ),
+                    f"${result['card_subtotal']:.2f}" if result["searched"] else "",
+                    str(result["inventory_status"]),
                     str(match["wanted"] if match else ""),
                     str((match or {}).get("set") or ""),
                     str((match or {}).get("condition") or ""),

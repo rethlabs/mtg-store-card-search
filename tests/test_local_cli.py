@@ -77,6 +77,27 @@ class LocalCliTests(unittest.TestCase):
             [],
         )
 
+    def test_physical_only_store_remains_visible_but_is_not_searched(self):
+        physical = store("Physical Store", "physical", 2.0)
+        physical["tcgplayer"] = {
+            "status": "physical_only",
+            "seller_name": None,
+            "seller_key": None,
+        }
+        physical["registry"] = {
+            "singles_status": "sells",
+            "tcgplayer_status": "physical_only",
+        }
+
+        results = search_local_inventory(
+            [physical], ["Sol Ring"], client=FakeClient()
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertFalse(results[0]["searched"])
+        self.assertIn("not searched", _render(results))
+        self.assertIn("physical_only", _render(results))
+
     def test_one_inventory_failure_does_not_abort_other_cards(self):
         results = search_local_inventory(
             [store("Example", "near", 1.0)],
