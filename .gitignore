@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local seller-resolution triage report
+tcgplayer-resolution-triage.jsonl
