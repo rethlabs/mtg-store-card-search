@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from tcg_local_finder.public_cli import _listings, parse_seller_url
+from tcg_local_finder.public_cli import _listings, build_parser, parse_seller_url
 
 
 class FakeClient:
@@ -31,6 +31,17 @@ class FakeClient:
 
 
 class PublicCliTests(unittest.TestCase):
+    def test_public_search_defaults_to_four_workers(self):
+        args = build_parser().parse_args(
+            [
+                "--seller-url",
+                "https://www.tcgplayer.com/sellers/Black-Castle-Gamez/b31b0b79",
+                "--card",
+                "Wind Strider",
+            ]
+        )
+        self.assertEqual(args.workers, 4)
+
     def test_parse_seller_url(self):
         name, key = parse_seller_url(
             "https://www.tcgplayer.com/sellers/Black-Castle-Gamez/b31b0b79?q=x"
