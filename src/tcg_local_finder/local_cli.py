@@ -128,6 +128,7 @@ def search_local_inventory(
         for store in stores
         if store in queryable
         or (store.get("registry") or {}).get("singles_status") == "sells"
+        or store.get("registry") is None
     ]
     queryable_ids = {str(store["wizards_store_id"]) for store in queryable}
     listings: dict[tuple[str, str], list[dict[str, Any]]] = {}
@@ -159,6 +160,7 @@ def search_local_inventory(
         searched = store_id in queryable_ids
         cheapest = []
         store_errors = []
+        not_found_cards = []
         for card in cards:
             matches = listings.get((store_id, card), [])
             if matches:
@@ -173,6 +175,8 @@ def search_local_inventory(
                 )
             if (store_id, card) in errors:
                 store_errors.append(f"{card}: {errors[(store_id, card)]}")
+            elif searched and not matches:
+                not_found_cards.append(card)
         results.append(
             {
                 "wizards_store_id": store_id,
@@ -192,6 +196,7 @@ def search_local_inventory(
                     sum(item["card_price"] for item in cheapest), 2
                 ),
                 "cheapest_listings": cheapest,
+                "not_found_cards": not_found_cards,
                 "inventory_errors": store_errors,
             }
         )
@@ -216,6 +221,7 @@ def _render(results: list[dict[str, Any]]) -> str:
         "Coverage",
         "Subtotal",
         "Inventory",
+        "Not found",
         "Wanted card",
         "Set",
         "Condition",
@@ -239,6 +245,11 @@ def _render(results: list[dict[str, Any]]) -> str:
                     ),
                     f"${result['card_subtotal']:.2f}" if result["searched"] else "",
                     str(result["inventory_status"]),
+                    (
+                        ", ".join(result["not_found_cards"])
+                        if result["searched"] and match is matches[0]
+                        else ""
+                    ),
                     str(match["wanted"] if match else ""),
                     str((match or {}).get("set") or ""),
                     str((match or {}).get("condition") or ""),
@@ -268,6 +279,22 @@ def _render(results: list[dict[str, Any]]) -> str:
     ]
     if inventory_errors:
         lines.extend(["", "Inventory request errors:", *inventory_errors])
+    searched_count = sum(bool(result["searched"]) for result in results)
+    wanted_count = max((result["wanted_count"] for result in results), default=0)
+    found_cards = {
+        str(match["wanted"])
+        for result in results
+        for match in result["cheapest_listings"]
+    }
+    lines.extend(
+        [
+            "",
+            (
+                f"Search summary: {searched_count}/{len(results)} stores searched; "
+                f"{len(found_cards)}/{wanted_count} wanted cards found."
+            ),
+        ]
+    )
     return "\n".join(lines)
 
 

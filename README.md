@@ -66,6 +66,9 @@ The command discovers Wizards stores, resolves their TCGplayer storefronts,
 searches every resolved seller for the requested cards, and ranks sellers by
 card coverage, card subtotal, distance, and name. The subtotal excludes
 shipping because marketplace shipping can depend on the combined order.
+The table names cards that were not found, retains newly discovered stores
+whose seller could not be resolved, and ends with searched-store and wanted-card
+coverage totals.
 
 Repeat `--city` or `--card`, or use `--cards-file cards.txt`. Unresolved seller
 names are written to the same JSONL triage report used by `wizards-stores`.

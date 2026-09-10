@@ -73,10 +73,13 @@ class LocalCliTests(unittest.TestCase):
         unresolved = store("Unknown", "unknown", 1.0)
         unresolved["tcgplayer"]["status"] = "not_found"
         unresolved["registry"] = None
-        self.assertEqual(
-            search_local_inventory([unresolved], ["Sol Ring"], client=FakeClient()),
-            [],
+        results = search_local_inventory(
+            [unresolved], ["Sol Ring"], client=FakeClient()
         )
+
+        self.assertEqual(len(results), 1)
+        self.assertFalse(results[0]["searched"])
+        self.assertIn("not_found", _render(results))
 
     def test_physical_only_store_remains_visible_but_is_not_searched(self):
         physical = store("Physical Store", "physical", 2.0)
@@ -108,6 +111,23 @@ class LocalCliTests(unittest.TestCase):
         self.assertEqual(results[0]["found_count"], 1)
         self.assertIn("Broken Card: temporary failure", results[0]["inventory_errors"])
         self.assertIn("Found Card", _render(results))
+
+    def test_render_names_cards_not_found_and_summarizes_search(self):
+        results = search_local_inventory(
+            [store("Example", "near", 1.0)],
+            ["Found Card", "Missing Card"],
+            client=FakeClient(),
+        )
+
+        rendered = _render(results)
+
+        self.assertEqual(results[0]["not_found_cards"], ["Missing Card"])
+        self.assertIn("Not found", rendered)
+        self.assertIn("Missing Card", rendered)
+        self.assertIn(
+            "Search summary: 1/1 stores searched; 1/2 wanted cards found.",
+            rendered,
+        )
 
 
 if __name__ == "__main__":
