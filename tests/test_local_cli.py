@@ -72,6 +72,7 @@ class LocalCliTests(unittest.TestCase):
     def test_unresolved_stores_are_not_searched(self):
         unresolved = store("Unknown", "unknown", 1.0)
         unresolved["tcgplayer"]["status"] = "not_found"
+        unresolved["registry"] = None
         self.assertEqual(
             search_local_inventory([unresolved], ["Sol Ring"], client=FakeClient()),
             [],
