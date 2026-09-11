@@ -127,7 +127,7 @@ def search_local_inventory(
         store
         for store in stores
         if store in queryable
-        or store.get("registry", {}).get("singles_status") == "sells"
+        or (store.get("registry") or {}).get("singles_status") == "sells"
     ]
     queryable_ids = {str(store["wizards_store_id"]) for store in queryable}
     listings: dict[tuple[str, str], list[dict[str, Any]]] = {}
